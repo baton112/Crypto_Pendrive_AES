@@ -11,7 +11,12 @@ using namespace std;
 int main()
 {
 	cout << "WItam " << endl;
+	cout << "Wprowadz symbol dysku do zaszyfrowania" << endl;
+	//WYBOR DYSTKU 
 
+
+
+	cout << "Wybrany dysk to " << PATH << endl;
 	/*
 	BYTE buffor[512] ;
 	//czyta mbr z pendriva 
@@ -26,12 +31,8 @@ int main()
 	drive::DisplaySector(buffor);
 	*/
 
-	drive::ChceckFileSystem();
-	std::cout << drive::NumberOfSectors();
-	
-
-
 
 	getchar();
 	return 0;
 }
+

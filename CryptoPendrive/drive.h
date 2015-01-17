@@ -5,6 +5,8 @@
 #include <string>
 
 
+#define PATH "\\\\.\\J:"
+
 class drive
 {
 public:
@@ -16,7 +18,7 @@ public:
 	static LONGLONG NumberOfSectors();
 	// 0 - nie znam // 1 - FAT32  // 2 - NTFS 
 	static int ChceckFileSystem();
-	
+	static void SelectDrive(char d);
 	
 };
 

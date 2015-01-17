@@ -1,6 +1,7 @@
 #include "drive.h"
 
 
+
 drive::drive(void)
 {
 }
@@ -17,7 +18,8 @@ int drive::ReadSector(int numSector,BYTE* buf)
     DWORD bytesRead;
     HANDLE device = NULL;
 
-    device = CreateFile("\\\\.\\J:",    // Drive to open
+	//  "\\\\.\\J:"
+	device = CreateFile(PATH,    // Drive to open
         GENERIC_READ|GENERIC_WRITE, 
 		FILE_SHARE_READ|FILE_SHARE_WRITE,        // Share Mode
         NULL,                   // Security Descriptor
@@ -160,5 +162,11 @@ LONGLONG drive::NumberOfSectors()
 	}
 	else return 0;
 
+
+}
+
+void drive::SelectDrive(char d)
+{
+	
 
 }
