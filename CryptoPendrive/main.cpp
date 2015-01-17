@@ -12,6 +12,7 @@ int main()
 {
 	cout << "WItam " << endl;
 
+	/*
 	BYTE buffor[512] ;
 	//czyta mbr z pendriva 
 	drive::ReadSector(0, buffor);
@@ -23,9 +24,12 @@ int main()
 	}
 	drive::WriteSector(0, buffor);
 	drive::DisplaySector(buffor);
+	*/
 
+	drive::ChceckFileSystem();
+	std::cout << drive::NumberOfSectors();
 	
-	
+
 
 
 	getchar();

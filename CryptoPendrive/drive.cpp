@@ -113,3 +113,52 @@ void drive::DisplaySector(BYTE* buff)
 	}
 
 }
+
+
+// 0 - nie rozpoznano systemu, 1 - FAT32, 2- NTFS
+int drive::ChceckFileSystem()
+{
+	//sprawdza offset 52H
+	BYTE buff[512] ;
+	drive::ReadSector(0, buff);
+	
+	std::string system; 
+
+	for(int i = 0x03 ; i < 0x0B; i++) // miejsce w mbr gdzie przymana jest nazwa systemu
+	{
+		system += buff[i];
+
+	}
+	std::cout << "Odczytano z boot sektora : "<< system << std::endl;
+	if(system == "MSDOS5.0") return 1;
+	else if(system == "NTFS    ") return 2;
+	else 
+	{
+		std::cout << "Nie rozpoznano systemu lub jest zakodowany";
+		return 0;
+	}
+}
+
+LONGLONG drive::NumberOfSectors()
+{
+	BYTE buffor[512];
+	if(ChceckFileSystem() == 0) return 0; 
+	else if(ChceckFileSystem() == 1) // fat32 - offset 20h - DWORD 
+	{
+		ReadSector(0, buffor);
+		//DWORD size = buffor[0x20];
+		DWORD size;
+		memcpy(&size, &buffor[0x20], sizeof(DWORD));
+		return (LONGLONG)size;
+
+	}else if(ChceckFileSystem() == 2 ) //NTFS - offset 28h - LONGLONG  
+	{
+		ReadSector(0, buffor);
+		LONGLONG   size;
+		memcpy(&size, &buffor[0x28], sizeof(LONGLONG));
+		return size;
+	}
+	else return 0;
+
+
+}
