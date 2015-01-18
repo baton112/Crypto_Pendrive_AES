@@ -12,6 +12,7 @@ private:
 	BYTE stateArray[4][4]; // 128 bitowy blok danych do kodowania 
 	/// rzad // kolumna  
 	BYTE *keyArray[4];
+	WORD *KeySchedule;
 	void getKey(BYTE *key);
 	int rows; 
 

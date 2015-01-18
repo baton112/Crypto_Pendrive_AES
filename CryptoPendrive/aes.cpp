@@ -8,6 +8,13 @@ aes::aes(BYTE *key, int keyLength)
 	{
 		keyArray[i] = new BYTE[4]; //new colums 
 	}
+	KeySchedule = new WORD[44];
+	//w0 = kolumna pierwsza key array 
+	//w1 = kol 2 keyArray 
+	//w2 = kol 3 keyArray
+	//w3 = kol 4 keyArray
+	///xor z XOR’ed with the input block before the round-based processing begins
+	// potem magiczne xory na nich i magiczna funkcja g i zapelniamy cala tablice keySchedule 
 }
 
 
