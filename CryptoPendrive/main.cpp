@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <iostream>
 #include "drive.h"
+#include "aes.h"
 
 using namespace std;
 
@@ -30,6 +31,12 @@ int main()
 	drive::WriteSector(0, buffor);
 	drive::DisplaySector(buffor);
 	*/
+
+
+	cout << endl;
+	BYTE key[128/8] = {	 0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00};
+	aes tmp(key, 128);
+	
 
 
 	getchar();
