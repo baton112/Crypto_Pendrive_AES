@@ -3,12 +3,9 @@
 
 aes::aes(BYTE *key, int keyLength)
 {
-	rows = keyLength/32;
-	for(int i = 0; i < rows; i++) //row 
-	{
-		keyArray[i] = new BYTE[4]; //new colums 
-	}
-	RoundKeySchedule = new BYTE[240];
+	keySize = keyLength;
+	
+	RoundKeySchedule = new BYTE[240]; // max ilosc kluczy potrzebnych przy 256 bitach klucza 
 
 	for(int i = 0 ; i < keyLength/8;i++)
 	{
@@ -17,13 +14,7 @@ aes::aes(BYTE *key, int keyLength)
 
 	expandKey();
 
-	//w0 = kolumna pierwsza key array 
-	//w1 = kol 2 keyArray 
-	//w2 = kol 3 keyArray
-	//w3 = kol 4 keyArray
-	///xor z XOR’ed with the input block before the round-based processing begins
-	// potem magiczne xory na nich i magiczna funkcja g i zapelniamy cala tablice keySchedule 
-	PrintExpandedKey(RoundKeySchedule, 10);
+	PrintExpandedKey(RoundKeySchedule, 14);
 
 }
 
@@ -209,27 +200,86 @@ void schedule_core(unsigned char *in, unsigned char i) {
 void aes::expandKey()
 {
 	unsigned char t[4];
-    /* c is 16 because the first sub-key is the user-supplied key */
-	unsigned char c = 16;
+    
 	unsigned char i = 1;
     unsigned char a;
 
-	/* We need 11 sets of sixteen bytes each for 128-bit mode */
-    while(c < 176) {
-            /* Copy the temporary variable over from the last 4-byte
-                * block */
-            for(a = 0; a < 4; a++) 
-				t[a] = RoundKeySchedule[a + c - 4];
-            /* Every four blocks (of four bytes), 
-                * do a complex calculation */
-            if(c % 16 == 0) {
-				schedule_core(t,i);
-				i++;
-			}
-            for(a = 0; a < 4; a++) {
-				RoundKeySchedule[c] = RoundKeySchedule[c - 16] ^ t[a];
-                    c++;
-            }
-    }
+	if(keySize == 128)
+	{
+		/* c is 16 because the first sub-key is the user-supplied key */
+		unsigned char c = 16;
+		/* We need 11 sets of sixteen bytes each for 128-bit mode */
+		while(c < 176) 
+		{
+				/* Copy the temporary variable over from the last 4-byte
+					* block */
+				for(a = 0; a < 4; a++) 
+					t[a] = RoundKeySchedule[a + c - 4];
+				/* Every four blocks (of four bytes), 
+					* do a complex calculation */
+				if(c % 16 == 0) 
+				{
+					schedule_core(t,i);
+					i++;
+				}
+				for(a = 0; a < 4; a++) 
+				{
+					RoundKeySchedule[c] = RoundKeySchedule[c - 16] ^ t[a];
+					c++;
+				}
+		}
+	}
+	if (keySize == 192)
+	{
+
+        unsigned char c = 24;
+
+        while(c < 208) 
+		{
+                /* Copy the temporary variable over */
+                for(a = 0; a < 4; a++) 
+                        t[a] = RoundKeySchedule[a + c - 4]; 
+                /* Every six sets, do a complex calculation */
+                if(c % 24 == 0) 
+				{
+                        schedule_core(t,i);
+						i++;
+				}
+                for(a = 0; a < 4; a++) 
+				{
+                        RoundKeySchedule[c] = RoundKeySchedule[c - 24] ^ t[a];
+                        c++;
+                }
+        }
+	}
+	if(keySize==256)
+	{
+
+        unsigned char c = 32;
+        while(c < 240) 
+		{
+                /* Copy the temporary variable over */
+                for(a = 0; a < 4; a++) 
+                        t[a] = RoundKeySchedule[a + c - 4]; 
+                /* Every eight sets, do a complex calculation */
+                if(c % 32 == 0) 
+				{
+                    schedule_core(t,i);
+					i++;
+				}
+                /* For 256-bit keys, we add an extra sbox to the
+                 * calculation */
+                if(c % 32 == 16) {
+                        for(a = 0; a < 4; a++) 
+                                t[a] = s[t[a]];
+                }
+                for(a = 0; a < 4; a++) {
+                        RoundKeySchedule[c] = RoundKeySchedule[c - 32] ^ t[a];
+                        c++;
+                }
+        }
+
+	}
+
 }
 
