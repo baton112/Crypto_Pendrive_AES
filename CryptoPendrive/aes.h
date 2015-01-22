@@ -8,23 +8,35 @@ class aes
 public:
 	aes(BYTE *key, int keyLength);
 	~aes(void);
-	void getByteBlock(BYTE *block); // przekszta³ca 128 bitów wejscowych na blok do AES // 16 bajtów 
-
+	void cipher(BYTE *tab); // szyfruje 128 od podanego wskaznika // 16 bajtow 
+	void inv_cipher(BYTE *tab);
 
 private:
+	//wiersz // kolumna 
 	BYTE stateArray[4][4]; // 128 bitowy blok danych do kodowania 
 	/// rzad // kolumna  
 	BYTE *keyArray[4];
+	int NumberOfRounds;
+
+	//uzywamy w kazdej rundzie do szyfrowania 
+	//do odszyfrowania puszczamy od konca algorytm -- priwszym kluczem jest ostatni
 	BYTE *RoundKeySchedule; // 176 // 208 // 240 - bajow w zaleznosci od dlugosci klucza 
 	int keySize;
 	int rows; 
 	int roundsToDo;
 	void setKey_enc();
 	void getKey(BYTE *key);
-	static const unsigned char inv_s;
 	static UINT32 getWord(BYTE *tab, int i);
 	void expandKey();
 	void PrintExpandedKey(BYTE *tab, int size);
+	void getByteBlock(BYTE *block); // przekszta³ca 128 bitów wejscowych na blok do AES // 16 bajtów 
+
+	void AddRoundKey(BYTE *roundKey);
+	void SubBytes();
+	void ShiftRows();
+	void MixColumns();
+
+	void InvSubBytes();
 
 };
 

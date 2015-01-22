@@ -73,91 +73,6 @@ UINT32 aes::getWord(BYTE *tab, int i)
 	return tmp; 
 }
 
-/*
-void aes::setKey_enc()
-{
-    unsigned int i;
-
-	switch( keySize )
-    {
-		case 128: roundsToDo = 10; break;
-        case 192: roundsToDo = 12; break;
-        case 256: roundsToDo = 14; break;
-    }
-
-
-	for( i = 0; i < ( keySize >> 5 ); i++ )
-    {
-        GET_UINT32_LE( RK[i], key, i << 2 );
-    }
-
-    switch( ctx->nr )
-    {
-        case 10:
-
-            for( i = 0; i < 10; i++, RK += 4 )
-            {
-                RK[4]  = RK[0] ^ RCON[i] ^
-                ( (uint32_t) FSb[ ( RK[3] >>  8 ) & 0xFF ]       ) ^
-                ( (uint32_t) FSb[ ( RK[3] >> 16 ) & 0xFF ] <<  8 ) ^
-                ( (uint32_t) FSb[ ( RK[3] >> 24 ) & 0xFF ] << 16 ) ^
-                ( (uint32_t) FSb[ ( RK[3]       ) & 0xFF ] << 24 );
-
-                RK[5]  = RK[1] ^ RK[4];
-                RK[6]  = RK[2] ^ RK[5];
-                RK[7]  = RK[3] ^ RK[6];
-            }
-            break;
-
-        case 12:
-
-            for( i = 0; i < 8; i++, RK += 6 )
-            {
-                RK[6]  = RK[0] ^ RCON[i] ^
-                ( (uint32_t) FSb[ ( RK[5] >>  8 ) & 0xFF ]       ) ^
-                ( (uint32_t) FSb[ ( RK[5] >> 16 ) & 0xFF ] <<  8 ) ^
-                ( (uint32_t) FSb[ ( RK[5] >> 24 ) & 0xFF ] << 16 ) ^
-                ( (uint32_t) FSb[ ( RK[5]       ) & 0xFF ] << 24 );
-
-                RK[7]  = RK[1] ^ RK[6];
-                RK[8]  = RK[2] ^ RK[7];
-                RK[9]  = RK[3] ^ RK[8];
-                RK[10] = RK[4] ^ RK[9];
-                RK[11] = RK[5] ^ RK[10];
-            }
-            break;
-
-        case 14:
-
-            for( i = 0; i < 7; i++, RK += 8 )
-            {
-                RK[8]  = RK[0] ^ RCON[i] ^
-                ( (uint32_t) FSb[ ( RK[7] >>  8 ) & 0xFF ]       ) ^
-                ( (uint32_t) FSb[ ( RK[7] >> 16 ) & 0xFF ] <<  8 ) ^
-                ( (uint32_t) FSb[ ( RK[7] >> 24 ) & 0xFF ] << 16 ) ^
-                ( (uint32_t) FSb[ ( RK[7]       ) & 0xFF ] << 24 );
-
-                RK[9]  = RK[1] ^ RK[8];
-                RK[10] = RK[2] ^ RK[9];
-                RK[11] = RK[3] ^ RK[10];
-
-                RK[12] = RK[4] ^
-                ( (uint32_t) FSb[ ( RK[11]       ) & 0xFF ]       ) ^
-                ( (uint32_t) FSb[ ( RK[11] >>  8 ) & 0xFF ] <<  8 ) ^
-                ( (uint32_t) FSb[ ( RK[11] >> 16 ) & 0xFF ] << 16 ) ^
-                ( (uint32_t) FSb[ ( RK[11] >> 24 ) & 0xFF ] << 24 );
-
-                RK[13] = RK[5] ^ RK[12];
-                RK[14] = RK[6] ^ RK[13];
-                RK[15] = RK[7] ^ RK[14];
-            }
-            break;
-    }
-
-   // return( 0 );
-}
-*/
-
 void rotate(unsigned char *in) {
         unsigned char a,c;
         a = in[0];
@@ -208,6 +123,7 @@ void aes::expandKey()
 	{
 		/* c is 16 because the first sub-key is the user-supplied key */
 		unsigned char c = 16;
+		NumberOfRounds = 10;
 		/* We need 11 sets of sixteen bytes each for 128-bit mode */
 		while(c < 176) 
 		{
@@ -231,7 +147,7 @@ void aes::expandKey()
 	}
 	if (keySize == 192)
 	{
-
+		NumberOfRounds = 12;
         unsigned char c = 24;
 
         while(c < 208) 
@@ -255,6 +171,7 @@ void aes::expandKey()
 	if(keySize==256)
 	{
 
+		NumberOfRounds = 14;
         unsigned char c = 32;
         while(c < 240) 
 		{
@@ -283,3 +200,115 @@ void aes::expandKey()
 
 }
 
+
+void aes::AddRoundKey(BYTE *roundKey) // 16 bajtow 
+{
+	for(int i = 0 ; i < 4; i++)
+	{
+		//XOR bytow klucza i stanu
+		for(int j = 0; j < 4; j++)//wiesz //row 
+		{
+			stateArray[j][i] ^= roundKey[i*4+j];
+		}
+	}
+}
+
+//podmienia elementy tablicy stanu wedlug ich w tablic s 
+void aes::SubBytes()
+{
+	for(int i = 0; i < 4 ; i++) 
+	{
+		for(int j = 0; j < 4; j++)
+		{
+			stateArray[i][j] = s[stateArray[i][j]];
+		}
+	}
+}
+
+void aes::InvSubBytes()
+{
+	for(int i = 0; i < 4 ; i++) 
+	{
+		for(int j = 0; j < 4; j++)
+		{
+			stateArray[i][j] = inv_s[stateArray[i][j]];
+		}
+	}
+}
+
+
+// Performs the ShiftRows step. All rows are shifted cylindrically to the left.
+void aes::ShiftRows()
+{
+
+	BYTE t;
+	// Shift left by 1
+	t = stateArray[1][0];
+	stateArray[1][0] = stateArray[1][1];
+	stateArray[1][1] = stateArray[1][2];
+	stateArray[1][2] = stateArray[1][3];
+	stateArray[1][3] = t;
+	// Shift left by 2
+	t = stateArray[2][0];
+	stateArray[2][0] = stateArray[2][2];
+	stateArray[2][2] = t;
+	t = stateArray[2][1];
+	stateArray[2][1] = stateArray[2][3];
+	stateArray[2][3] = t;
+	// Shift left by 3
+	t = stateArray[3][0];
+	stateArray[3][0] = stateArray[3][3];
+	stateArray[3][3] = stateArray[3][2];
+	stateArray[3][2] = stateArray[3][1];
+	stateArray[3][1] = t;
+}
+
+
+
+void aes::cipher(BYTE *tab) 
+{
+	getByteBlock(tab);
+
+	AddRoundKey(&RoundKeySchedule[0]);
+
+	//for round = 1 step 1 to Nr–1
+	for(int round = 1; round < NumberOfRounds ; round++)
+	{
+		SubBytes();
+		ShiftRows();
+		MixColumns();
+		AddRoundKey(&RoundKeySchedule[round*4, (round+1)*4-1]);
+	}
+
+	SubBytes();
+	ShiftRows();
+
+	AddRoundKey( &RoundKeySchedule[NumberOfRounds*4, (NumberOfRounds+1)*4-1]);
+	
+
+}
+
+/*
+void aes::inv_cipher(byte *tab)
+{
+	
+	byte stateArray[4,Nb]
+	state = in
+
+	AddRoundKey(state, w[Nr*Nb, (Nr+1)*Nb-1])
+
+	for round = Nr-1 step -1 downto 1
+	{
+		InvShiftRows(state)
+		InvSubBytes(state)
+		AddRoundKey(state, w[round*Nb, (round+1)*Nb-1])
+		InvMixColumns(state)
+	}
+	
+	InvShiftRows(state)
+	InvSubBytes(state)
+
+	AddRoundKey(state, w[0, Nb-1])
+	
+
+}*/
