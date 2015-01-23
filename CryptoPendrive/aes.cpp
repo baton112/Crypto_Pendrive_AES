@@ -15,7 +15,7 @@ aes::aes(BYTE *key, int keyLength)
 	expandKey();
 
 
-	//PrintExpandedKey(RoundKeySchedule, 14);
+	PrintExpandedKey(RoundKeySchedule, 14);
 
 }
 
@@ -323,7 +323,7 @@ void aes::cipher(BYTE *tab)
 	PrintStateArray();
 	
 
-	AddRoundKey(RoundKeySchedule);
+	AddRoundKey(RoundKeySchedule); // raczej dziala dobrze 
 
 	std::cout << "Po dodaniu klucza rundy" <<std::endl;
 	PrintStateArray();
@@ -331,16 +331,25 @@ void aes::cipher(BYTE *tab)
 	//for round = 1 step 1 to Nr–1
 	for(int round = 1; round < NumberOfRounds ; round++)
 	{
-		SubBytes();
-		ShiftRows();
-		MixColumns();
-		AddRoundKey(&RoundKeySchedule[round*4, (round+1)*4-1]);
+		SubBytes(); //dzialaa na bank
+		//std::cout << "SUB BYTES" <<std::endl;
+		//PrintStateArray();
+		ShiftRows(); //skopiowane z neta
+		//std::cout << "SHIFT ROWS" <<std::endl;
+		//PrintStateArray();
+		MixColumns(); //skopiowane z neta 
+		//std::cout << "MIX COLUMS" <<std::endl;
+		//PrintStateArray();
+		//AddRoundKey(&RoundKeySchedule[round*4, (round+1)*4-1]);
+		AddRoundKey(&RoundKeySchedule[round*16]);
+		//std::cout << "ADD ROUND KEY" <<std::endl;
+		//PrintStateArray();
 	}
 
 	SubBytes();
 	ShiftRows();
 
-	AddRoundKey( &RoundKeySchedule[NumberOfRounds*4, (NumberOfRounds+1)*4-1]);
+	AddRoundKey( &RoundKeySchedule[NumberOfRounds*16]);
 	
 
 	PrintStateArray();
