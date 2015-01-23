@@ -10,7 +10,7 @@ public:
 	~aes(void);
 	void cipher(BYTE *tab); // szyfruje 128 od podanego wskaznika // 16 bajtow 
 	void inv_cipher(BYTE *tab);
-
+	
 private:
 	//wiersz // kolumna 
 	BYTE stateArray[4][4]; // 128 bitowy blok danych do kodowania 
@@ -28,12 +28,19 @@ private:
 	void getKey(BYTE *key);
 	static UINT32 getWord(BYTE *tab, int i);
 	void expandKey();
+
+	//debug 
 	void PrintExpandedKey(BYTE *tab, int size);
+	void PrintStateArray();
+
+
 	void getByteBlock(BYTE *block); // przekszta³ca 128 bitów wejscowych na blok do AES // 16 bajtów 
 
 	void AddRoundKey(BYTE *roundKey);
 	void SubBytes();
 	void ShiftRows();
+
+	BYTE GMul(BYTE a, BYTE b) ;
 	void MixColumns();
 
 	void InvSubBytes();

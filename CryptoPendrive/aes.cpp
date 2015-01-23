@@ -14,7 +14,8 @@ aes::aes(BYTE *key, int keyLength)
 
 	expandKey();
 
-	PrintExpandedKey(RoundKeySchedule, 14);
+
+	//PrintExpandedKey(RoundKeySchedule, 14);
 
 }
 
@@ -208,7 +209,8 @@ void aes::AddRoundKey(BYTE *roundKey) // 16 bajtow
 		//XOR bytow klucza i stanu
 		for(int j = 0; j < 4; j++)//wiesz //row 
 		{
-			stateArray[j][i] ^= roundKey[i*4+j];
+			stateArray[j][i] ^= roundKey[i*4+j]; //xor z kluczem 
+			
 		}
 	}
 }
@@ -263,13 +265,68 @@ void aes::ShiftRows()
 	stateArray[3][1] = t;
 }
 
+BYTE aes::GMul(BYTE a, BYTE b) 
+{ // Galois Field (256) Multiplication of two Bytes
+   BYTE p = 0;
+   BYTE counter;
+   BYTE hi_bit_set;
+   for (counter = 0; counter < 8; counter++) {
+      if ((b & 1) != 0) {
+         p ^= a;
+      }
+      hi_bit_set = (BYTE) (a & 0x80);
+      a <<= 1;
+      if (hi_bit_set != 0) {
+         a ^= 0x1b; /* x^8 + x^4 + x^3 + x + 1 */
+      }
+      b >>= 1;
+   }
+   return p;
+}
 
+void aes::MixColumns() { // 's' is the main State matrix, 'ss' is a temp matrix of the same dimensions as 's'.
+
+	BYTE ss[4][4];
+   //Array.Clear(ss, 0, ss.Length); 
+	
+	for (int c = 0; c < 4; c++) 
+	{
+		ss[0][c] = (BYTE) (GMul(0x02, stateArray[0][c]) ^ GMul(0x03, stateArray[1][c]) ^ stateArray[2][c] ^ stateArray[3][ c]);
+		ss[1][c] = (BYTE) (stateArray[0][c] ^ GMul(0x02, stateArray[1][c]) ^ GMul(0x03, stateArray[2][c]) ^ stateArray[3][c]);
+		ss[2][c] = (BYTE) (stateArray[0][c] ^ stateArray[1][c] ^ GMul(0x02, stateArray[2][c]) ^ GMul(0x03, stateArray[3][c]));
+		ss[3][c] = (BYTE) (GMul(0x03, stateArray[0][c]) ^ stateArray[1][c] ^ stateArray[2][c] ^ GMul(0x02, stateArray[3][c]));
+	}
+
+	//kopiowanie ss do s 
+	for(int i = 0; i < 4 ; i++)
+	{
+		for(int j = 0; j < 4; j++)
+		{
+			stateArray[i][j] = ss[i][j];
+		}
+	}
+   
+}
 
 void aes::cipher(BYTE *tab) 
 {
+	//PrintStateArray();
+
+	for(int i = 0 ; i < 16; i++) 
+		std::cout <<std::hex << tab[i];
+
+	std::cout <<std::endl;
+
 	getByteBlock(tab);
 
-	AddRoundKey(&RoundKeySchedule[0]);
+	std::cout << "Po wczytaniu bloku z danymi : " <<std::endl;
+	PrintStateArray();
+	
+
+	AddRoundKey(RoundKeySchedule);
+
+	std::cout << "Po dodaniu klucza rundy" <<std::endl;
+	PrintStateArray();
 
 	//for round = 1 step 1 to Nr–1
 	for(int round = 1; round < NumberOfRounds ; round++)
@@ -285,6 +342,8 @@ void aes::cipher(BYTE *tab)
 
 	AddRoundKey( &RoundKeySchedule[NumberOfRounds*4, (NumberOfRounds+1)*4-1]);
 	
+
+	PrintStateArray();
 
 }
 
@@ -312,3 +371,20 @@ void aes::inv_cipher(byte *tab)
 	
 
 }*/
+
+void aes::PrintStateArray()
+{
+
+	for(int i = 0; i < 4 ; i++)
+	{
+		for(int j=0; j < 4; j++)
+		{
+			if((int)stateArray[i][j] < 16)
+				std::cout << std::hex << "0"<< (int)stateArray[i][j] << " ";
+			else 
+				std::cout << std::hex << (int)stateArray[i][j] << " ";
+		}
+		std::cout << std::endl;
+	}
+
+}
