@@ -268,7 +268,7 @@ void aes::ShiftRows()
 }
 
 
-void aes::InvShifRows(){
+void aes::InvShiftRows(){
 	BYTE t;
 
 	t = stateArray[1][3];
@@ -382,30 +382,30 @@ void aes::cipher(BYTE *tab)
 
 }
 
-/*
+
 void aes::inv_cipher(byte *tab)
 {
 	
-	byte stateArray[4,Nb]
-	state = in
+	byte stateArray[4][4];
 
-	AddRoundKey(state, w[Nr*Nb, (Nr+1)*Nb-1])
+	AddRoundKey( &RoundKeySchedule[NumberOfRounds*16]);
 
-	for round = Nr-1 step -1 downto 1
+	//for round = Nr-1 step -1 downto 1
+	for(int round = NumberOfRounds-1; round >=1 ;round--)
 	{
-		InvShiftRows(state)
-		InvSubBytes(state)
-		AddRoundKey(state, w[round*Nb, (round+1)*Nb-1])
-		InvMixColumns(state)
+		InvShiftRows();
+		InvSubBytes();
+		AddRoundKey(&RoundKeySchedule[round*16]);
+		InvMixColumns();
 	}
 	
-	InvShiftRows(state)
-	InvSubBytes(state)
+	InvShiftRows();
+	InvSubBytes();
 
-	AddRoundKey(state, w[0, Nb-1])
+	AddRoundKey(RoundKeySchedule);
 	
-
-}*/
+	PrintStateArray();
+}
 
 void aes::PrintStateArray()
 {
