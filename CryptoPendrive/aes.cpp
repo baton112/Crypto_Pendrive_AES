@@ -274,23 +274,23 @@ void aes::InvShiftRows(){
 	BYTE t;
 
 	t = stateArray[1][3];
-	stateArray[1][1] = stateArray[1][0];
-	stateArray[1][2] = stateArray[1][1];
 	stateArray[1][3] = stateArray[1][2];
+	stateArray[1][2] = stateArray[1][1];
+	stateArray[1][1] = stateArray[1][0];
 	stateArray[1][0] = t;
-
-	t = stateArray[2][0];
-	stateArray[2][0] = stateArray[2][2];
-	stateArray[2][2] = t;
-	t = stateArray[2][1];
-	stateArray[2][1] = stateArray[2][3];
-	stateArray[2][3] = t;
-
-	t = stateArray[3][0];
+	// Shift right by 2
+	t = stateArray[2][3];
+	stateArray[2][3] = stateArray[2][1];
+	stateArray[2][1] = t;
+	t = stateArray[2][2];
+	stateArray[2][2] = stateArray[2][0];
+	stateArray[2][0] = t;
+	// Shift right by 3
+	t = stateArray[3][3];
+	stateArray[3][3] = stateArray[3][0];
 	stateArray[3][0] = stateArray[3][1];
 	stateArray[3][1] = stateArray[3][2];
-	stateArray[3][2] = stateArray[3][3];
-	stateArray[3][3] = t;
+	stateArray[3][2] = t;
 }
 
 BYTE aes::GMul(BYTE a, BYTE b) 
@@ -427,20 +427,31 @@ void aes::inv_cipher(byte *tab)
 
 	AddRoundKey( &RoundKeySchedule[NumberOfRounds*16]);
 
+	std::cout << "PIERWSZYT round key dodany" <<std::endl;
+	PrintStateArray();
+
 	//for round = Nr-1 step -1 downto 1
-	for(int round = NumberOfRounds-1; round >=1 ;round--)
+	for(int round = NumberOfRounds-1; round >= 1 ;round--)
 	{
 		InvShiftRows();
+		std::cout << "INV SHIFT ROWS" <<std::endl;
+		PrintStateArray();
 		InvSubBytes();
+		std::cout << "INV BYTES ROWS" <<std::endl;
+		PrintStateArray();
 		AddRoundKey(&RoundKeySchedule[round*16]);
+		std::cout << "ADD ROUND KEY" <<std::endl;
+		PrintStateArray();
 		InvMixColumns();
+		std::cout << "INV MIX COLUMNS" <<std::endl;
+		PrintStateArray();
 	}
 	
 	InvShiftRows();
 	InvSubBytes();
 
 	AddRoundKey(RoundKeySchedule);
-	
+	std::cout << "Po odszyfrowaniu : " <<std::endl;
 	PrintStateArray();
 }
 
