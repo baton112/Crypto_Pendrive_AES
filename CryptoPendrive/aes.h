@@ -44,7 +44,7 @@ private:
 	void MixColumns();
 
 	void InvSubBytes();
-	void InvShifRows();
+	void InvShiftRows();
 
 };
 
