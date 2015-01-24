@@ -45,10 +45,7 @@ private:
 
 	void InvSubBytes();
 	void InvShiftRows();
-<<<<<<< HEAD
-=======
 	void InvMixColumns();
->>>>>>> origin/master
 
 };
 
