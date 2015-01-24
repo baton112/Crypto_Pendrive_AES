@@ -239,6 +239,8 @@ void aes::InvSubBytes()
 }
 
 
+
+
 // Performs the ShiftRows step. All rows are shifted cylindrically to the left.
 void aes::ShiftRows()
 {
@@ -263,6 +265,30 @@ void aes::ShiftRows()
 	stateArray[3][3] = stateArray[3][2];
 	stateArray[3][2] = stateArray[3][1];
 	stateArray[3][1] = t;
+}
+
+
+void aes::InvShifRows(){
+	BYTE t;
+
+	t = stateArray[1][3];
+	stateArray[1][1] = stateArray[1][0];
+	stateArray[1][2] = stateArray[1][1];
+	stateArray[1][3] = stateArray[1][2];
+	stateArray[1][0] = t;
+
+	t = stateArray[2][0];
+	stateArray[2][0] = stateArray[2][2];
+	stateArray[2][2] = t;
+	t = stateArray[2][1];
+	stateArray[2][1] = stateArray[2][3];
+	stateArray[2][3] = t;
+
+	t = stateArray[3][0];
+	stateArray[3][0] = stateArray[3][1];
+	stateArray[3][1] = stateArray[3][2];
+	stateArray[3][2] = stateArray[3][3];
+	stateArray[3][3] = t;
 }
 
 BYTE aes::GMul(BYTE a, BYTE b) 
