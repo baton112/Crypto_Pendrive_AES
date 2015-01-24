@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <string>
+#include "aes.h"
 
 
 #define PATH "\\\\.\\J:"
@@ -19,6 +20,8 @@ public:
 	// 0 - nie znam // 1 - FAT32  // 2 - NTFS 
 	static int ChceckFileSystem();
 	static void SelectDrive(char d);
+	static void CypherSector(BYTE* buf, aes crypto);
+	static void InvCypherSector(BYTE* buf, aes crypto);
 	
 };
 

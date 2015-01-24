@@ -170,3 +170,19 @@ void drive::SelectDrive(char d)
 	
 
 }
+
+void drive::CypherSector(BYTE* buf, aes crypto)
+{
+	for(int i=0; i < 512; i+= 128/8)
+	{
+		crypto.cipher(&buf[i]);
+	}
+}
+
+void drive::InvCypherSector(BYTE* buf, aes crypto)
+{
+	for(int i=0; i < 512; i+= 128/8)
+	{
+		crypto.inv_cipher(&buf[i]);
+	}
+}
