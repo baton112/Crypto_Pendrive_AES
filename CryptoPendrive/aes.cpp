@@ -15,7 +15,7 @@ aes::aes(BYTE *key, int keyLength)
 	expandKey();
 
 
-	PrintExpandedKey(RoundKeySchedule, 14);
+	//PrintExpandedKey(RoundKeySchedule, 14);
 
 }
 
@@ -241,8 +241,6 @@ void aes::InvSubBytes()
 }
 
 
-
-
 // Performs the ShiftRows step. All rows are shifted cylindrically to the left.
 void aes::ShiftRows()
 {
@@ -364,21 +362,21 @@ void aes::cipher(BYTE *tab)
 {
 	//PrintStateArray();
 
-	for(int i = 0 ; i < 16; i++) 
-		std::cout <<std::hex << tab[i];
-
-	std::cout <<std::endl;
+	//for(int i = 0 ; i < 16; i++) 
+	//	std::cout <<std::hex << tab[i];
+	//
+	//std::cout <<std::endl;
 
 	getByteBlock(tab);
 
-	std::cout << "Po wczytaniu bloku z danymi : " <<std::endl;
-	PrintStateArray();
+	//std::cout << "Po wczytaniu bloku z danymi : " <<std::endl;
+	//PrintStateArray();
 	
 
 	AddRoundKey(RoundKeySchedule); // raczej dziala dobrze 
 
-	std::cout << "Po dodaniu klucza rundy" <<std::endl;
-	PrintStateArray();
+	//std::cout << "Po dodaniu klucza rundy" <<std::endl;
+	//PrintStateArray();
 
 	//for round = 1 step 1 to Nr–1
 	for(int round = 1; round < NumberOfRounds ; round++)
@@ -404,7 +402,7 @@ void aes::cipher(BYTE *tab)
 	AddRoundKey( &RoundKeySchedule[NumberOfRounds*16]);
 	
 
-	PrintStateArray();
+	//PrintStateArray();
 
 	returnByteBlock(tab);
 
@@ -414,45 +412,48 @@ void aes::cipher(BYTE *tab)
 void aes::inv_cipher(byte *tab)
 {
 	
-	for(int i = 0 ; i < 16; i++) 
-		std::cout <<std::hex << tab[i];
-
-	std::cout <<std::endl;
+	//for(int i = 0 ; i < 16; i++) 
+	//	std::cout <<std::hex << tab[i];
+//
+	//std::cout <<std::endl;
 
 	getByteBlock(tab);
 
-	std::cout << "Po wczytaniu bloku z danymi : " <<std::endl;
-	PrintStateArray();
+	//std::cout << "Po wczytaniu bloku z danymi : " <<std::endl;
+	//PrintStateArray();
 	
 
 	AddRoundKey( &RoundKeySchedule[NumberOfRounds*16]);
 
-	std::cout << "PIERWSZYT round key dodany" <<std::endl;
-	PrintStateArray();
+	//std::cout << "PIERWSZYT round key dodany" <<std::endl;
+	//PrintStateArray();
 
 	//for round = Nr-1 step -1 downto 1
 	for(int round = NumberOfRounds-1; round >= 1 ;round--)
 	{
 		InvShiftRows();
-		std::cout << "INV SHIFT ROWS" <<std::endl;
-		PrintStateArray();
+		//std::cout << "INV SHIFT ROWS" <<std::endl;
+		//PrintStateArray();
 		InvSubBytes();
-		std::cout << "INV BYTES ROWS" <<std::endl;
-		PrintStateArray();
+		//std::cout << "INV BYTES ROWS" <<std::endl;
+		//PrintStateArray();
 		AddRoundKey(&RoundKeySchedule[round*16]);
-		std::cout << "ADD ROUND KEY" <<std::endl;
-		PrintStateArray();
+		//std::cout << "ADD ROUND KEY" <<std::endl;
+		//PrintStateArray();
 		InvMixColumns();
-		std::cout << "INV MIX COLUMNS" <<std::endl;
-		PrintStateArray();
+		//std::cout << "INV MIX COLUMNS" <<std::endl;
+		//PrintStateArray();
 	}
 	
 	InvShiftRows();
 	InvSubBytes();
 
 	AddRoundKey(RoundKeySchedule);
-	std::cout << "Po odszyfrowaniu : " <<std::endl;
-	PrintStateArray();
+	//std::cout << "Po odszyfrowaniu : " <<std::endl;
+	//PrintStateArray();
+
+	returnByteBlock(tab);
+
 }
 
 void aes::PrintStateArray()

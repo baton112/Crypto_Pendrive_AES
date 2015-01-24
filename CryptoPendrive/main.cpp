@@ -51,10 +51,34 @@ int main()
 
 	}*/
 	//BYTE dane[] = "aaaaaaaaaaaaaaaa";
+	std::cout << " Przed szyfrowaniem" << std::endl;
+	for(int i = 0; i < 16 ; i++)
+	{
+		if((int)dane[i] < 16)
+			std::cout << std::hex << "0"<< (int)dane[i] << " ";
+		else 
+			std::cout << std::hex << (int)dane[i] << " ";
+	}
+	std::cout << std::endl;
 	tmp.cipher( dane);
-	std::cout << "rozszyfrowne " << std::endl;
+	std::cout << " PO szyfrowaniem" << std::endl;
+	for(int i = 0; i < 16 ; i++)
+	{
+		if((int)dane[i] < 16)
+			std::cout << std::hex << "0"<< (int)dane[i] << " ";
+		else 
+			std::cout << std::hex << (int)dane[i] << " ";
+	}
+	std::cout << std::endl;
 	tmp.inv_cipher(dane);
-
+	std::cout << " PO rozszyfrowaniu" << std::endl;
+	for(int i = 0; i < 16 ; i++)
+	{
+		if((int)dane[i] < 16)
+			std::cout << std::hex << "0"<< (int)dane[i] << " ";
+		else 
+			std::cout << std::hex << (int)dane[i] << " ";
+	}
 	getchar();
 	return 0;
 }
