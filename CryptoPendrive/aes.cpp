@@ -51,6 +51,18 @@ void aes::getByteBlock(BYTE *block)
 	
 }
 
+void aes::returnByteBlock(BYTE *block)
+{
+	for(int i = 0; i < 4; i++)//kolumna //colum
+	{
+		for(int j = 0; j < 4; j++)//wiesz //row 
+		{
+			 block[i*4+j] = stateArray[j][i];
+		}
+	}
+	
+}
+
 void aes::getKey(BYTE *key)
 {
 	for(int i = 0; i < 4; i++)//kolumna //colum
@@ -62,16 +74,6 @@ void aes::getKey(BYTE *key)
 	}
 
 
-}
-
-//word - 4 bajty 
-UINT32 aes::getWord(BYTE *tab, int i)
-{
-	UINT32 tmp = 0;
-
-
-
-	return tmp; 
 }
 
 void rotate(unsigned char *in) {
@@ -404,13 +406,24 @@ void aes::cipher(BYTE *tab)
 
 	PrintStateArray();
 
+	returnByteBlock(tab);
+
 }
 
 
 void aes::inv_cipher(byte *tab)
 {
 	
-	byte stateArray[4][4];
+	for(int i = 0 ; i < 16; i++) 
+		std::cout <<std::hex << tab[i];
+
+	std::cout <<std::endl;
+
+	getByteBlock(tab);
+
+	std::cout << "Po wczytaniu bloku z danymi : " <<std::endl;
+	PrintStateArray();
+	
 
 	AddRoundKey( &RoundKeySchedule[NumberOfRounds*16]);
 

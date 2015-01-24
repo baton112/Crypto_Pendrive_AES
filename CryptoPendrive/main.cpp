@@ -52,7 +52,8 @@ int main()
 	}*/
 	//BYTE dane[] = "aaaaaaaaaaaaaaaa";
 	tmp.cipher( dane);
-	
+	std::cout << "rozszyfrowne " << std::endl;
+	tmp.inv_cipher(dane);
 
 	getchar();
 	return 0;

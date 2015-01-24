@@ -26,7 +26,6 @@ private:
 	int roundsToDo;
 	void setKey_enc();
 	void getKey(BYTE *key);
-	static UINT32 getWord(BYTE *tab, int i);
 	void expandKey();
 
 	//debug 
@@ -35,6 +34,7 @@ private:
 
 
 	void getByteBlock(BYTE *block); // przekszta³ca 128 bitów wejscowych na blok do AES // 16 bajtów 
+	void returnByteBlock(BYTE *block);
 
 	void AddRoundKey(BYTE *roundKey);
 	void SubBytes();
