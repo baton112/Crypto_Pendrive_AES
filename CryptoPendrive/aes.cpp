@@ -334,6 +334,30 @@ void aes::MixColumns() { // 's' is the main State matrix, 'ss' is a temp matrix 
    
 }
 
+void aes::InvMixColumns() { // 's' is the main State matrix, 'ss' is a temp matrix of the same dimensions as 's'.
+
+	BYTE ss[4][4];
+	//Array.Clear(ss, 0, ss.Length); 
+
+	for (int c = 0; c < 4; c++)
+	{
+		ss[0][c] = (BYTE)(GMul(0x0e, stateArray[0][c]) ^ GMul(0x0b, stateArray[1][c]) ^ GMul(0x0d, stateArray[2][c]) ^ GMul(0x09,stateArray[3][c]));
+		ss[1][c] = (BYTE)(GMul(0x09,stateArray[0][c] )^ GMul(0x0e, stateArray[1][c]) ^ GMul(0x0b, stateArray[2][c]) ^ GMul(0x0d,stateArray[3][c]));
+		ss[2][c] = (BYTE)(GMul(0x0d,stateArray[0][c] )^ GMul(0x09,stateArray[1][c]) ^ GMul(0x0e, stateArray[2][c]) ^ GMul(0x0b, stateArray[3][c]));
+		ss[3][c] = (BYTE)(GMul(0x0b, stateArray[0][c]) ^ GMul(0x0d,stateArray[1][c]) ^ GMul(0x09,stateArray[2][c]) ^ GMul(0x0e, stateArray[3][c]));
+	}
+
+	//kopiowanie ss do s 
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			stateArray[i][j] = ss[i][j];
+		}
+	}
+
+}
+
 void aes::cipher(BYTE *tab) 
 {
 	//PrintStateArray();
