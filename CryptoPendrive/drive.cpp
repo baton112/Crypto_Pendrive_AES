@@ -27,6 +27,21 @@ int drive::ReadSector(int numSector,BYTE* buf)
         0,                      // File attributes
         NULL);                  // Handle to template
 
+	DWORD bytesReturned;
+	/*BOOL DeviceIoControl(
+  (HANDLE) hDevice,            // handle to a volume
+  (DWORD) FSCTL_LOCK_VOLUME,   // dwIoControlCode
+  NULL,                        // lpInBuffer
+  0,                           // nInBufferSize
+  NULL,                        // lpOutBuffer
+  0,                           // nOutBufferSize
+  (LPDWORD) lpBytesReturned,   // number of bytes returned
+  (LPOVERLAPPED) lpOverlapped  // OVERLAPPED structure
+);
+*/
+	DeviceIoControl(device, FSCTL_LOCK_VOLUME, NULL,0,  NULL,0, &bytesReturned,0);
+
+
     if(device != NULL)
     {
         // Read one sector
@@ -66,6 +81,8 @@ int drive::WriteSector(int numSector, BYTE* buf)
         0,                      // File attributes
         NULL);                  // Handle to template
 
+	DWORD bytesReturned;
+	DeviceIoControl(device, FSCTL_LOCK_VOLUME, NULL, 0, NULL, 0, &bytesReturned, 0);
     if(device != NULL)
     {
         // Read one sector
