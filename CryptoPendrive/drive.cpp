@@ -20,7 +20,7 @@ drive::drive(void)
 	FATtable = new BYTE[FAT_SIZE*512];
 
 	DWORD bytesRead;
-	HANDLE device = NULL;
+	device = NULL;
 
 	device = CreateFile(PATH,    // Drive to open
 		GENERIC_READ|GENERIC_WRITE, 
@@ -77,7 +77,7 @@ drive::drive(void)
 	{
 		if(ROOTdir[i] != 0xE5 && ROOTdir[i] != 0x00 && ROOTdir[i+0x0b] != 0x0f)  //krutka nazwa 
 		{
-			std::cout << i/32 << " - ";
+			std::cout << std::dec <<(int)i/32 << " - ";
 			PrintFileName(&ROOTdir[i]);
 		}
 		else if(ROOTdir[i] != 0xE5 && ROOTdir[i] != 0x00 && ROOTdir[i] == 0x01) //dluga nazwa 
@@ -104,7 +104,7 @@ drive::drive(void)
 drive::drive(aes crypto, bool cipher)
 {
 	BYTE buffor[512]; 
-	HANDLE device = NULL;
+	device = NULL;
 	DWORD bytesRead;
 
 	//char logical[65536];
@@ -124,12 +124,13 @@ drive::drive(aes crypto, bool cipher)
 
 	DeviceIoControl(device, FSCTL_LOCK_VOLUME, NULL, 0, NULL, 0, &bytesReturned, 0);
 
-	ULONG64 numberOfSectors = 1;
+	ULONG64 numberOfSectors = 1000;
 	if(cipher) //szyfrujemy
 	{
 		for(int i = 0 ; i < numberOfSectors; i++)
 		{
 			//odczytanie 
+			//numberOfSectors = drive::NumberOfSectors();
 			SetFilePointer (device, i*512, NULL, FILE_BEGIN) ;
 			if (!ReadFile(device, buffor, 512, &bytesRead, NULL))
 			{
@@ -187,10 +188,11 @@ drive::drive(aes crypto, bool cipher)
 				std::cout << " ERROR writing disc " << i  << std::endl; 
 				Sleep(1000);
 			}
+			//numberOfSectors = drive::NumberOfSectors();
 			std::cout << "Postep " <<  std::dec << i << std::endl;
 		}
 	}
-	CloseHandle(device);
+	//CloseHandle(device);
 }
 
 drive::~drive(void)
@@ -594,6 +596,7 @@ void drive::InvCypherFile( aes crypto, int cluster)
 
 	if(FATtable[cluster*4] != 0xFF)
 		CypherFile(crypto, FATtable[cluster*4]);
+
 
 }
 

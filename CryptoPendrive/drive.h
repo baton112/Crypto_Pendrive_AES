@@ -30,7 +30,7 @@ extern int ROOTdir_cluster;
 class drive
 {
 private: 
-	//HANDLE device;
+	HANDLE device;
 public:
 	drive(aes crypto, bool cipher);
 	drive(void);

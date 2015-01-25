@@ -26,7 +26,7 @@ int main()
 	
 	//sprawdzenie czy dysk zostal zaszyfrowany 
 	BYTE buffor[512] ;
-	//drive::ReadSector(0, buffor);
+	drive::ReadSector(0, buffor);
 	//drive::DisplaySector(buffor);
 
 	drive::PrintDiscGemetry();
@@ -39,7 +39,7 @@ int main()
 	drive::SetClusterSize_FAT_OFFSET();
 
 	//drive::PrintFiles();
-	
+	/*
 	drive d;
 	
 	cout << "Wybierz nazwe pliku. " << PATH << endl;
@@ -51,10 +51,10 @@ int main()
 	//d.CypherFile(crypto, nrPliku);
 	d.FindFirstSector(nrPliku, crypto);
 	cout << "Zaszyfrowano " << PATH << endl;
-	
+	*/
 
 
-	/*switch (fileSystem)
+	switch (fileSystem)
 	{
 	case 0: 
 		{
@@ -109,7 +109,7 @@ int main()
 	
 	default:
 		break;
-	}*/
+	}
 	
 
 	
