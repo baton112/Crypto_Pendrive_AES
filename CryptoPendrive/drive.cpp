@@ -1,21 +1,116 @@
 #include "drive.h"
 
 
+void writeLongName(BYTE *tab)
+{
+	for(int i = 1; i < 0x0b ; i+=2) 
+		std::cout << tab[i];
+	for(int i = 0x0e; i < 0x1a ;i+=2) 
+		std::cout << tab[i];
+	for(int i = 0x1c; i < 0x20 ; i+=2) 
+		std::cout << tab[i];
+
+}
 
 drive::drive(void)
 {
+	SetClusterSize_FAT_OFFSET();
+
+	
+	FATtable = new BYTE[FAT_SIZE*512];
+
+	DWORD bytesRead;
+	HANDLE device = NULL;
+
+	device = CreateFile(PATH,    // Drive to open
+		GENERIC_READ|GENERIC_WRITE, 
+		FILE_SHARE_READ|FILE_SHARE_WRITE,        // Share Mode
+		NULL,                   // Security Descriptor
+		OPEN_EXISTING,          // How to create
+		0,                      // File attributes
+		NULL);                  // Handle to template
+	DWORD bytesReturned;
+
+	DeviceIoControl(device, FSCTL_LOCK_VOLUME, NULL, 0, NULL, 0, &bytesReturned, 0);
+
+	//przeczytanie tablicy fat 
+	
+	for(int i = 0; i < 1000; i++) // bo za dlugo dziala 
+	{
+		if(device != NULL)
+		{
+			// Read one sector
+			SetFilePointer (device, (i+FAT_OFFSET)*512, NULL, FILE_BEGIN) ;
+			if (!ReadFile(device, &FATtable[i*512], 512, &bytesRead, NULL))
+			{
+				std::cout << " ERROR reading disc" << std::endl; 
+			}
+		}
+
+    }
+	drive::DisplaySector(FATtable );
+
+
+	//ROOT Directory 
+	cluster_begin = 2*FAT_SIZE + FAT_OFFSET; // drugi klaste // root directory 
+	ROOTdir = new BYTE[CLUSTER_SIZE*512];
+
+	for(int i = 0; i < CLUSTER_SIZE; i++)
+	{
+		if(device != NULL)
+		{
+			// Read one sector
+			SetFilePointer (device, i*512+cluster_begin*512, NULL, FILE_BEGIN) ;
+			if (!ReadFile(device, &ROOTdir[i*512], 512, &bytesRead, NULL))
+			{
+				std::cout << " ERROR reading disc" << std::endl; 
+			}
+		}
+	}
+
+	drive::DisplaySector(ROOTdir);
+
+	//32 - wpis w directory 
+	BYTE fileEnd = 0;
+	std::cout << " _________  PLIKI NA DYSKU ________ " << std::endl;
+	for(int i = 0; i < CLUSTER_SIZE*512; i+=32)
+	{
+		if(ROOTdir[i] != 0xE5 && ROOTdir[i] != 0x00 && ROOTdir[i+0x0b] != 0x0f)  //krutka nazwa 
+		{
+			std::cout << i/32 << " - ";
+			PrintFileName(&ROOTdir[i]);
+		}
+		else if(ROOTdir[i] != 0xE5 && ROOTdir[i] != 0x00 && ROOTdir[i] == 0x01) //dluga nazwa 
+		{
+			writeLongName(&ROOTdir[i]);
+			for(int j = 0 ; j < fileEnd; j++)
+			{
+				writeLongName(&ROOTdir[i-j*32]);
+			}
+			std::cout << std::endl;
+			fileEnd = 0;
+		}
+		else if(fileEnd == 0 )
+		{
+			fileEnd = ROOTdir[i] - 0x40;
+		}
+	}
+
+	 // Close the handle
+	CloseHandle(device);
+	
 }
 
 drive::drive(aes crypto, bool cipher)
 {
 	BYTE buffor[512]; 
-	device = NULL;
+	HANDLE device = NULL;
 	DWORD bytesRead;
 
-	char logical[65536];
-    QueryDosDevice("J:",logical, sizeof(logical));
-      
-	std::cout<< logical ;
+	//char logical[65536];
+   // QueryDosDevice("J:",logical, sizeof(logical));
+    //  
+	//std::cout<< logical ;
 	
 	device = CreateFile(PATH,    // Drive to open
         GENERIC_READ|GENERIC_WRITE, 
@@ -95,13 +190,12 @@ drive::drive(aes crypto, bool cipher)
 			std::cout << "Postep " <<  std::dec << i << std::endl;
 		}
 	}
+	CloseHandle(device);
 }
 
 drive::~drive(void)
 {
-	 CloseHandle(device);
 }
-
 
 int drive::ReadSector(int numSector,BYTE* buf)
 {
@@ -119,18 +213,15 @@ int drive::ReadSector(int numSector,BYTE* buf)
         NULL);                  // Handle to template
 	DWORD bytesReturned;
 
-	//DeviceIoControl(device, FSCTL_LOCK_VOLUME, NULL, 0, NULL, 0, &bytesReturned, 0);
+	DeviceIoControl(device, FSCTL_LOCK_VOLUME, NULL, 0, NULL, 0, &bytesReturned, 0);
+
     if(device != NULL)
     {
         // Read one sector
         SetFilePointer (device, numSector*512, NULL, FILE_BEGIN) ;
-jeszczeRaz:
         if (!ReadFile(device, sector, 512, &bytesRead, NULL))
         {
-            //Print("Error in reading1 floppy disk\n",numligne++);
 			std::cout << " ERROR reading disc" << std::endl; 
-			Sleep(1000);
-			goto jeszczeRaz;
 		}
         else
         {
@@ -143,12 +234,13 @@ jeszczeRaz:
         // Close the handle
     }
 
+
+
     return retCode;
 }
 
 int drive::WriteSector(int numSector, BYTE* buf)
 {
-	jeszczeRaz:
 	int retCode = 0;
     BYTE sector[512];
     DWORD bytesRead;
@@ -163,6 +255,7 @@ int drive::WriteSector(int numSector, BYTE* buf)
         NULL);                  // Handle to template
 
 	DWORD bytesReturned;
+
 	DeviceIoControl(device, FSCTL_LOCK_VOLUME, NULL, 0, NULL, 0, &bytesReturned, 0);
 
     if(device != NULL)
@@ -175,8 +268,6 @@ int drive::WriteSector(int numSector, BYTE* buf)
         {
             //Print("Error in reading1 floppy disk\n",numligne++);
 			std::cout << " ERROR writing disc " << numSector  << std::endl; 
-			Sleep(1000);
-			goto jeszczeRaz;
 		}
         else
         {
@@ -414,6 +505,102 @@ void drive::InvCypherDrive(aes crypto)
 		//std::cout << "Postep " << ((double)i/(double)numberOfSectors)*100.0 << std::endl;
 		std::cout << "Postep " << std::dec << i << std::endl;
 	}
+
+
+}
+
+void drive::SetClusterSize_FAT_OFFSET()
+{
+	BYTE buffor[512];
+	drive::ReadSector(0, buffor);
+	//drive::DisplaySector(buffor);
+	CLUSTER_SIZE = buffor[0x0D]; // offset wielkosci klastra 
+	FAT_OFFSET = 0;
+	FAT_OFFSET = buffor[0x0F] << 8 ;  //fat offset 
+	FAT_OFFSET += buffor[0x0E];
+
+	std::cout << "Rozmiar klastra " << std::dec << (int) CLUSTER_SIZE<<std::endl;
+	std::cout << "OFFSET FAT  " <<std::dec << FAT_OFFSET<<std::endl;
+
+	//rozmiar tablic fat 
+	FAT_SIZE = 0;
+	FAT_SIZE +=  buffor[0x27] ;
+	FAT_SIZE <<= 8;
+	FAT_SIZE +=  buffor[0x26];
+	FAT_SIZE <<= 8;
+	FAT_SIZE +=  buffor[0x25] ;
+	FAT_SIZE <<= 8;
+	FAT_SIZE +=  buffor[0x24] ;
+
+
+	std::cout << "FAT SIZE   " <<std::dec << FAT_SIZE  << "  "  << std::hex << FAT_SIZE  <<std::endl;
+
+	ROOTdir_cluster = 0;
+	ROOTdir_cluster = buffor[0x2C];
+	std::cout << "ROOT CLUSTER    " <<std::dec <<ROOTdir_cluster   <<std::endl;
+	
+}
+
+void drive::PrintFileName(BYTE *rootEntry)
+{
+	for(int j = 0; j < 8; j++)
+	{
+		std::cout << rootEntry[j];
+	}
+	std::cout <<"." ;
+	for(int j = 8; j < 8+3; j++)
+	{
+		std::cout << rootEntry[j];
+	}
+	std::cout << std::endl;
+
+}
+
+void drive::CypherFile( aes crypto, int cluster)
+{
+	//0x14 - high word
+	//0x1a - low word 
+	//int clusterNumber = FATtable[0x14*cluster];
+	BYTE *tab = new BYTE[512];
+	for(int i = 0; i < CLUSTER_SIZE; i++)
+	{
+		drive::ReadSector(cluster_begin +(cluster-3) *CLUSTER_SIZE + i , tab);
+		std::cout << "sektor " <<  std::dec << cluster_begin +(cluster-3) *CLUSTER_SIZE + i << "    " << "klaster " << cluster << std::endl;
+		drive::CypherSector(tab, crypto);
+		drive::WriteSector(cluster_begin +(cluster-3) *CLUSTER_SIZE + i, tab);
+	}
+
+	
+	if(FATtable[cluster*4] != 0xFF)
+		CypherFile(crypto, FATtable[cluster*4]);
+
+
+}
+
+void drive::InvCypherFile( aes crypto, int cluster)
+{
+	//0x14 - high word
+	//0x1a - low word 
+	//int clusterNumber = FATtable[0x14*cluster];
+	BYTE *tab = new BYTE[512];
+	for(int i = 0; i < CLUSTER_SIZE; i++)
+	{
+		//dres drugiego klastra + (cluster - 2) *512*CLUSTER_SIZE
+		drive::ReadSector(cluster_begin +(cluster - 3) *CLUSTER_SIZE + i , tab);
+		drive::InvCypherSector(tab, crypto);
+		drive::WriteSector(cluster_begin +(cluster - 3) *CLUSTER_SIZE + i, tab);
+	
+	}
+
+	if(FATtable[cluster*4] != 0xFF)
+		CypherFile(crypto, FATtable[cluster*4]);
+
+}
+
+void drive::FindFirstSector(int i, aes crypto)
+{
+	char cluster = ROOTdir[i*32+0x1a];
+	CypherFile(crypto, cluster);
 
 
 }

@@ -9,6 +9,10 @@
 
 
 extern char PATH[100];
+extern BYTE CLUSTER_SIZE;
+extern int FAT_OFFSET;
+extern INT64 FAT_SIZE;
+extern int ROOTdir_cluster;
 
 //#define PATH "\\\\.\\PhysicalDrive2"
 //#define PATH "\\.\\Device\\HarddiskVolume11"
@@ -26,7 +30,7 @@ extern char PATH[100];
 class drive
 {
 private: 
-	HANDLE device;
+	//HANDLE device;
 public:
 	drive(aes crypto, bool cipher);
 	drive(void);
@@ -46,5 +50,18 @@ public:
 
 	static BOOL GetDriveGeometry(char* Path, DISK_GEOMETRY *pdg);
 	static void PrintDiscGemetry();
+	static void SetClusterSize_FAT_OFFSET();
+
+	static void PrintFileName(BYTE *rootEntry);
+
+
+	void CypherFile(  aes crypto, int cluster);
+	void InvCypherFile( aes crypto, int cluster);
+	void FindFirstSector(int i, aes crypto);
+private:
+	BYTE *FATtable;
+	BYTE *ROOTdir;
+	int cluster_begin; //drugi klaster 
+
 };
 
