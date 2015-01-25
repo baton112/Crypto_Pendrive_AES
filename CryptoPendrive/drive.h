@@ -8,7 +8,7 @@
 #include <stdio.h>
 
 
-#define PATH "\\\\.\\J:"
+extern char PATH[100];
 
 //#define PATH "\\\\.\\PhysicalDrive2"
 //#define PATH "\\.\\Device\\HarddiskVolume11"

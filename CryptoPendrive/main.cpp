@@ -7,7 +7,7 @@
 using namespace std;
 
 
-
+char PATH[100];
 
 int main()
 {
@@ -15,7 +15,7 @@ int main()
 	cout << "Wprowadz symbol dysku do zaszyfrowania" << endl;
 	//WYBOR DYSTKU 
 
-
+	cin >> PATH;
 
 	cout << "Wybrany dysk to " << PATH << endl;
 
