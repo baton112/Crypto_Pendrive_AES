@@ -4,13 +4,19 @@
 #include <iostream>
 #include <string>
 #include "aes.h"
-
+#include <winioctl.h>
+#include <stdio.h>
 
 #define PATH "\\\\.\\J:"
 
+#define wszDrive L"\\\\.\\PhysicalDrive2"
+
 class drive
 {
+private: 
+	HANDLE device;
 public:
+	drive(aes crypto, bool cipher);
 	drive(void);
 	~drive(void);
 	static int ReadSector(int numSector,BYTE* buf);
@@ -24,5 +30,9 @@ public:
 	static void InvCypherSector(BYTE* buf, aes crypto);
 	
 	static void CypherDrive(aes crypto);
+	static void InvCypherDrive(aes crypto);
+
+	static BOOL GetDriveGeometry(LPWSTR wszPath, DISK_GEOMETRY *pdg);
+	static void PrintDiscGemetry();
 };
 

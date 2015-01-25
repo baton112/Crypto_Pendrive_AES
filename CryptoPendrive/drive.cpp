@@ -6,10 +6,90 @@ drive::drive(void)
 {
 }
 
+drive::drive(aes crypto, bool cipher)
+{
+	BYTE buffor[512]; 
+	device = NULL;
+	DWORD bytesRead;
+
+	device = CreateFile(PATH,    // Drive to open
+        GENERIC_READ|GENERIC_WRITE, 
+		FILE_SHARE_READ|FILE_SHARE_WRITE,        // Share Mode
+        NULL,                   // Security Descriptor
+        OPEN_EXISTING,          // How to create
+        0,                      // File attributes
+        NULL);  
+
+	DWORD bytesReturned;
+
+	DeviceIoControl(device, FSCTL_LOCK_VOLUME, NULL, 0, NULL, 0, &bytesReturned, 0);
+
+	if(cipher) //szyfrujemy
+	{
+		for(int i = 0 ; i < 100; i++)
+		{
+			//odczytanie 
+			SetFilePointer (device, i*512, NULL, FILE_BEGIN) ;
+			if (!ReadFile(device, buffor, 512, &bytesRead, NULL))
+			{
+				//Print("Error in reading1 floppy disk\n",numligne++);
+				std::cout << " ERROR reading disc" << std::endl; 
+				Sleep(1000);
+			}
+			
+			for(int j=0; j < 512; j+= 128/8)
+			{
+				crypto.cipher(&buffor[j]);
+			}
+
+			// zapisanie 
+			SetFilePointer (device, i*512, NULL, FILE_BEGIN) ;
+			if(!WriteFile(device,buffor, 512,&bytesRead, NULL))
+			{
+				//Print("Error in reading1 floppy disk\n",numligne++);
+				std::cout << " ERROR writing disc " << i  << std::endl; 
+				Sleep(1000);
+			}
+			std::cout << "Postep " <<  std::dec << i << std::endl;
+
+		}
+	}
+	else 
+	{
+		for(int i = 0 ; i < 100; i++)
+		{
+			//odczytanie 
+			SetFilePointer (device, i*512, NULL, FILE_BEGIN) ;
+			if (!ReadFile(device, buffor, 512, &bytesRead, NULL))
+			{
+				//Print("Error in reading1 floppy disk\n",numligne++);
+				std::cout << " ERROR reading disc" << std::endl; 
+				Sleep(1000);
+			}
+			
+			for(int j=0; j < 512; j+= 128/8)
+			{
+				crypto.inv_cipher(&buffor[j]);
+			}
+
+			// zapisanie 
+			SetFilePointer (device, i*512, NULL, FILE_BEGIN) ;
+			if(!WriteFile(device,buffor, 512,&bytesRead, NULL))
+			{
+				//Print("Error in reading1 floppy disk\n",numligne++);
+				std::cout << " ERROR writing disc " << i  << std::endl; 
+				Sleep(1000);
+			}
+			std::cout << "Postep " <<  std::dec << i << std::endl;
+		}
+	}
+}
 
 drive::~drive(void)
 {
+	 CloseHandle(device);
 }
+
 
 int drive::ReadSector(int numSector,BYTE* buf)
 {
@@ -18,7 +98,6 @@ int drive::ReadSector(int numSector,BYTE* buf)
     DWORD bytesRead;
     HANDLE device = NULL;
 
-	//  "\\\\.\\J:"
 	device = CreateFile(PATH,    // Drive to open
         GENERIC_READ|GENERIC_WRITE, 
 		FILE_SHARE_READ|FILE_SHARE_WRITE,        // Share Mode
@@ -27,27 +106,19 @@ int drive::ReadSector(int numSector,BYTE* buf)
         0,                      // File attributes
         NULL);                  // Handle to template
 	DWORD bytesReturned;
-	/*BOOL DeviceIoControl(
-	(HANDLE) hDevice,            // handle to a volume
-	(DWORD) FSCTL_LOCK_VOLUME,   // dwIoControlCode
-	NULL,                        // lpInBuffer
-	0,                           // nInBufferSize
-	NULL,                        // lpOutBuffer
-	0,                           // nOutBufferSize
-	(LPDWORD) lpBytesReturned,   // number of bytes returned
-	(LPOVERLAPPED) lpOverlapped  // OVERLAPPED structure
-	);
-	*/
-	DeviceIoControl(device, FSCTL_LOCK_VOLUME, NULL, 0, NULL, 0, &bytesReturned, 0);
+
+	//DeviceIoControl(device, FSCTL_LOCK_VOLUME, NULL, 0, NULL, 0, &bytesReturned, 0);
     if(device != NULL)
     {
         // Read one sector
         SetFilePointer (device, numSector*512, NULL, FILE_BEGIN) ;
-
+jeszczeRaz:
         if (!ReadFile(device, sector, 512, &bytesRead, NULL))
         {
             //Print("Error in reading1 floppy disk\n",numligne++);
 			std::cout << " ERROR reading disc" << std::endl; 
+			Sleep(1000);
+			goto jeszczeRaz;
 		}
         else
         {
@@ -65,20 +136,23 @@ int drive::ReadSector(int numSector,BYTE* buf)
 
 int drive::WriteSector(int numSector, BYTE* buf)
 {
+	jeszczeRaz:
 	int retCode = 0;
     BYTE sector[512];
     DWORD bytesRead;
     HANDLE device = NULL;
 
-    device = CreateFile("\\\\.\\J:",    // Drive to open
+	device = CreateFile(PATH,    // Drive to open
         GENERIC_READ|GENERIC_WRITE, 
 		FILE_SHARE_READ|FILE_SHARE_WRITE,        // Share Mode
         NULL,                   // Security Descriptor
         OPEN_EXISTING,          // How to create
         0,                      // File attributes
         NULL);                  // Handle to template
+
 	DWORD bytesReturned;
 	DeviceIoControl(device, FSCTL_LOCK_VOLUME, NULL, 0, NULL, 0, &bytesReturned, 0);
+
     if(device != NULL)
     {
         // Read one sector
@@ -88,7 +162,9 @@ int drive::WriteSector(int numSector, BYTE* buf)
 		if(!WriteFile(device,buf, 512,&bytesRead, NULL))
         {
             //Print("Error in reading1 floppy disk\n",numligne++);
-			std::cout << " ERROR reading disc" << std::endl; 
+			std::cout << " ERROR writing disc " << numSector  << std::endl; 
+			Sleep(1000);
+			goto jeszczeRaz;
 		}
         else
         {
@@ -144,7 +220,7 @@ int drive::ChceckFileSystem()
 		system += buff[i];
 
 	}
-	std::cout << "Odczytano z boot sektora : "<< system << std::endl;
+	//std::cout << "Odczytano z boot sektora : "<< system << std::endl;
 	if(system == "MSDOS5.0") return 1;
 	else if(system == "NTFS    ") return 2;
 	else 
@@ -154,8 +230,76 @@ int drive::ChceckFileSystem()
 	}
 }
 
+BOOL drive::GetDriveGeometry(LPWSTR wszPath, DISK_GEOMETRY *pdg)
+{
+	HANDLE hDevice = INVALID_HANDLE_VALUE;  // handle to the drive to be examined 
+	BOOL bResult   = FALSE;                 // results flag
+	DWORD junk     = 0;                     // discard results
+
+	hDevice = CreateFileW(wszPath,          // drive to open
+						0,                // no access to the drive
+						FILE_SHARE_READ | // share mode
+						FILE_SHARE_WRITE, 
+						NULL,             // default security attributes
+						OPEN_EXISTING,    // disposition
+						0,                // file attributes
+						NULL);            // do not copy file attributes
+
+	if (hDevice == INVALID_HANDLE_VALUE)    // cannot open the drive
+	{
+	return (FALSE);
+	}
+
+	bResult = DeviceIoControl(hDevice,                       // device to be queried
+							IOCTL_DISK_GET_DRIVE_GEOMETRY, // operation to perform
+							NULL, 0,                       // no input buffer
+							pdg, sizeof(*pdg),            // output buffer
+							&junk,                         // # bytes returned
+							(LPOVERLAPPED) NULL);          // synchronous I/O
+
+	DWORD nRead;
+	char buf[512];
+
+	CloseHandle(hDevice);
+
+	return (bResult);
+}
+
+void drive::PrintDiscGemetry()
+{
+  DISK_GEOMETRY pdg = { 0 }; // disk drive geometry structure
+  BOOL bResult = FALSE;      // generic results flag
+  ULONGLONG DiskSize = 0;    // size of the drive, in bytes
+
+  bResult = GetDriveGeometry (wszDrive, &pdg);
+
+  if (bResult) 
+  {
+    wprintf(L"Drive path      = %ws\n",   wszDrive);
+    wprintf(L"Cylinders       = %I64d\n", pdg.Cylinders);
+    wprintf(L"Tracks/cylinder = %ld\n",   (ULONG) pdg.TracksPerCylinder);
+    wprintf(L"Sectors/track   = %ld\n",   (ULONG) pdg.SectorsPerTrack);
+    wprintf(L"Bytes/sector    = %ld\n",   (ULONG) pdg.BytesPerSector);
+
+    DiskSize = pdg.Cylinders.QuadPart * (ULONG)pdg.TracksPerCylinder *
+               (ULONG)pdg.SectorsPerTrack * (ULONG)pdg.BytesPerSector;
+    wprintf(L"Disk size       = %I64d (Bytes)\n"
+            L"                = %.2f (Gb)\n", 
+            DiskSize, (double) DiskSize / (1024 * 1024 * 1024));
+  } 
+  else 
+  {
+    wprintf (L"GetDriveGeometry failed. Error %ld.\n", GetLastError ());
+  }
+
+
+
+}
+
 LONGLONG drive::NumberOfSectors()
 {
+	PrintDiscGemetry();
+	
 	BYTE buffor[512];
 	if(ChceckFileSystem() == 0) return 0; 
 	else if(ChceckFileSystem() == 1) // fat32 - offset 20h - DWORD 
@@ -164,18 +308,34 @@ LONGLONG drive::NumberOfSectors()
 		//DWORD size = buffor[0x20];
 		DWORD size;
 		memcpy(&size, &buffor[0x20], sizeof(DWORD));
-		return (LONGLONG)size;
+		//return (LONGLONG)size;
+		std::cout << "ROZMIAR " << size;
 
 	}else if(ChceckFileSystem() == 2 ) //NTFS - offset 28h - LONGLONG  
 	{
 		ReadSector(0, buffor);
 		LONGLONG   size;
 		memcpy(&size, &buffor[0x28], sizeof(LONGLONG));
-		return size;
+		//return size;
+		std::cout << "ROZMIAR " << size;
 	}
-	else return 0;
+	//else return 0;
+	
 
+	BOOL bResult = FALSE;      // generic results flag
+	
+	DISK_GEOMETRY pdg = { 0 }; // disk drive geometry structure
+	bResult = GetDriveGeometry (wszDrive, &pdg);
 
+	if (bResult) 
+	{
+		return pdg.Cylinders.QuadPart * (ULONG) pdg.TracksPerCylinder * (ULONG) pdg.SectorsPerTrack;
+	}
+	else 
+	{
+		wprintf (L"GetDriveGeometry failed. Error %ld.\n", GetLastError ());
+	}
+	return 0;
 }
 
 void drive::SelectDrive(char d)
@@ -200,18 +360,49 @@ void drive::InvCypherSector(BYTE* buf, aes crypto)
 	}
 }
 
+void zero(BYTE *buf)
+{
+	for(int i = 0 ; i < 512 ; i++)
+	{
+		buf[i] = 0;
+
+	}
+}
+
 void drive::CypherDrive(aes crypto)
 {
 	BYTE buffor[512] ;
 	LONGLONG numberOfSectors = drive::NumberOfSectors();
 	std::cout << numberOfSectors << std::endl;
 
-	for(int i = 0; i < numberOfSectors; i++)
+	//for(int i = 0; i < numberOfSectors; i++)
+	for(int i = 0 ; i < 100 ; i++)
 	{
 		drive::ReadSector(i, buffor);
 		drive::CypherSector(buffor, crypto);
+		//zero(buffor);
 		drive::WriteSector(i, buffor);
-		std::cout << "Postêp " << i << std::endl;
+		//std::cout << "Postep " << ((double)i/(double)numberOfSectors)*100.0 << std::endl;
+		std::cout << "Postep " <<  std::dec << i << std::endl;
+	}
+
+
+}
+
+void drive::InvCypherDrive(aes crypto)
+{
+	BYTE buffor[512] ;
+	LONGLONG numberOfSectors = drive::NumberOfSectors();
+	std::cout << numberOfSectors << std::endl;
+
+	//for(int i = 0; i < numberOfSectors; i++)
+	for(int i = 0 ; i < 100 ; i++)
+	{
+		drive::ReadSector(i, buffor);
+		drive::InvCypherSector(buffor, crypto);
+		drive::WriteSector(i, buffor);
+		//std::cout << "Postep " << ((double)i/(double)numberOfSectors)*100.0 << std::endl;
+		std::cout << "Postep " << std::dec << i << std::endl;
 	}
 
 

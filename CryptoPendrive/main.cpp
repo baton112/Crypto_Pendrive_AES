@@ -21,62 +21,79 @@ int main()
 
 	//sprawdzenie czy dysk zostal zaszyfrowany 
 	BYTE buffor[512] ;
-	drive::ReadSector(0, buffor);
-	drive::DisplaySector(buffor);
+	//drive::ReadSector(0, buffor);
+	//drive::DisplaySector(buffor);
 
-	drive::ChceckFileSystem();
+	drive::PrintDiscGemetry();
 
-	if(buffor[510] == 0x55 && buffor[511] == 0xaa)
+	int fileSystem = drive::ChceckFileSystem();
+
+	//if(buffor[510] == 0x55 && buffor[511] == 0xaa)
+	switch (fileSystem)
 	{
-		cout << "Dysk nie zaszyfrowany " << endl;
-		cout << "1 - Zaszyfroj " << endl;
+	case 0: 
+		{
+			cout << "Dysk zaszyfrowany " << endl;
+			cout << "1 - Odszyfrij " << endl;
+			int opcja = 0;
+			cin >> opcja;
+			switch (opcja)
+			{
+			case 1:
+					{
+						BYTE key[256/8] = {	 0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00,  0x00, 0x00, 0x00 };
+						aes crypto(key, 128);
+						//drive::InvCypherDrive(crypto);
+						//drive::ReadSector(0, buffor);
+						//drive::InvCypherSector(buffor, crypto);
+						//drive::WriteSector(0, buffor);
+						drive d(crypto, false);
+						cout << "Odszyfrowano " << endl;
+				}
+				break;
+			
+			default:
+				break;
+			}
+			
+		}
+		break;
+	case 1:
+	case 2:
+		{
+			cout << "Dysk nie zaszyfrowany " << endl;
+			cout << "1 - Zaszyfroj " << endl;
 		
-		int opcja = 0;
-		cin >> opcja;
-		switch (opcja)
-		{
-		case 1:
+			int opcja = 0;
+			cin >> opcja;
+			switch (opcja)
 			{
-				BYTE key[256/8] = {	 0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00,  0x00, 0x00, 0x00 };
-				aes crypto(key, 128);
+			case 1:
+				{
+					BYTE key[256/8] = {	 0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00,  0x00, 0x00, 0x00 };
+					aes crypto(key, 128);
 
-				drive::CypherDrive(crypto);
-				//drive::ReadSector(0, buffor);
-				//drive::CypherSector(buffor, crypto);
-				//drive::WriteSector(0, buffor);
-				cout << "Zaszyfrowano " << endl;
-			}
-			break;
+					//drive::CypherDrive(crypto);
+					//drive::ReadSector(0, buffor);
+					//drive::CypherSector(buffor, crypto);
+					//drive::WriteSector(0, buffor);
+					drive d(crypto, true);
+					cout << "Zaszyfrowano " << endl;
+				}
+				break;
 			
-		default:
-			break;
-		}
-
-	}
-	else 
-	{
-		cout << "Dysk zaszyfrowany " << endl;
-		cout << "1 - Odszyfrij " << endl;
-		int opcja = 0;
-		cin >> opcja;
-		switch (opcja)
-		{
-		case 1:
-			{
-				BYTE key[256/8] = {	 0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00,  0x00, 0x00, 0x00 };
-				aes crypto(key, 128);
-				drive::ReadSector(0, buffor);
-				drive::InvCypherSector(buffor, crypto);
-				drive::WriteSector(0, buffor);
-				cout << "Odszyfrowano " << endl;
+			default:
+				break;
 			}
-			break;
 			
-		default:
-			break;
 		}
-
+		break;
+	
+	default:
+		break;
 	}
+	
+
 
 	
 
@@ -142,7 +159,7 @@ int main()
 			std::cout << std::hex << (int)dane[i] << " ";
 	}*/
 
-	drive::ReadSector(0, buffor);
+	//drive::ReadSector(0, buffor);
 
 	system("pause");
 	getchar();
