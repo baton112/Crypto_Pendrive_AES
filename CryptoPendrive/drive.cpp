@@ -417,3 +417,38 @@ void drive::InvCypherDrive(aes crypto)
 
 
 }
+
+
+
+void drive::ListDrives(){
+
+	DWORD dwSize = MAX_PATH;
+	char szLogicalDrives[MAX_PATH] = { 0 };
+	DWORD dwResult = GetLogicalDriveStrings(dwSize, szLogicalDrives);
+	int i = 0;
+
+	if (dwResult > 0 && dwResult <= MAX_PATH)
+	{
+		
+		char* szSingleDrive = szLogicalDrives;
+		char devices[10];
+		while (*szSingleDrive)
+		{
+			
+			printf("%d : %s\n", i,szSingleDrive);
+			devices[i] = szSingleDrive[0];
+			// get the next drive
+			szSingleDrive += strlen(szSingleDrive) + 1;
+			i++;
+		}
+	//	std::cout << "wprowadz numer" << std::endl;;
+		std::cin >> i;
+		szSingleDrive = szLogicalDrives;
+
+		PATH[4] = devices[i];
+
+	}
+
+
+
+}

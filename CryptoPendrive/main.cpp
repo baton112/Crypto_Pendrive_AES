@@ -7,15 +7,17 @@
 using namespace std;
 
 
-char PATH[100];
+char PATH[100] = "\\\\.\\X:";
 
 int main()
 {
-	cout << "WItam " << endl;
-	cout << "Wprowadz symbol dysku do zaszyfrowania" << endl;
-	//WYBOR DYSTKU 
 
-	cin >> PATH;
+
+	cout << "WItam " << endl;
+	cout << "Wprowadz odpowiedni numer dysku" << endl;
+	//WYBOR DYSTKU 
+	drive::ListDrives();
+//	cin >> PATH;
 
 	cout << "Wybrany dysk to " << PATH << endl;
 
