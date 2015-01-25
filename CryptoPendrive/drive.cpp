@@ -242,13 +242,13 @@ int drive::ChceckFileSystem()
 	}
 }
 
-BOOL drive::GetDriveGeometry(LPWSTR wszPath, DISK_GEOMETRY *pdg)
+BOOL drive::GetDriveGeometry(char* Path, DISK_GEOMETRY *pdg)
 {
 	HANDLE hDevice = INVALID_HANDLE_VALUE;  // handle to the drive to be examined 
 	BOOL bResult   = FALSE;                 // results flag
 	DWORD junk     = 0;                     // discard results
 
-	hDevice = CreateFile(PATH,//wszPath,          // drive to open
+	hDevice = CreateFile(Path,//wszPath,          // drive to open
 						0,                // no access to the drive
 						FILE_SHARE_READ | // share mode
 						FILE_SHARE_WRITE, 
@@ -281,11 +281,11 @@ void drive::PrintDiscGemetry()
   BOOL bResult = FALSE;      // generic results flag
   ULONGLONG DiskSize = 0;    // size of the drive, in bytes
 
-  bResult = GetDriveGeometry (wszDrive, &pdg);
+  bResult = GetDriveGeometry (PATH, &pdg);
 
   if (bResult) 
   {
-    wprintf(L"Drive path      = %ws\n",   wszDrive);
+    printf("Drive path      = %s\n",   PATH);
     wprintf(L"Cylinders       = %I64d\n", pdg.Cylinders);
     wprintf(L"Tracks/cylinder = %ld\n",   (ULONG) pdg.TracksPerCylinder);
     wprintf(L"Sectors/track   = %ld\n",   (ULONG) pdg.SectorsPerTrack);
@@ -335,7 +335,7 @@ LONGLONG drive::NumberOfSectors()
 	BOOL bResult = FALSE;      // generic results flag
 	
 	DISK_GEOMETRY pdg = { 0 }; // disk drive geometry structure
-	bResult = GetDriveGeometry (wszDrive, &pdg);
+	bResult = GetDriveGeometry (PATH, &pdg);
 
 	if (bResult) 
 	{

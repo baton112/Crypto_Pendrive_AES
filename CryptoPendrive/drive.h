@@ -17,7 +17,7 @@
 //#define PATH "\\\\.\\PhysicalDrive1"
 
 //#define wszDrive L"\\\\.\\PhysicalDrive2"
-#define wszDrive L"\\\\.\\J:"
+//#define wszDrive L"\\\\.\\J:"
 
 
 
@@ -44,7 +44,7 @@ public:
 	static void CypherDrive(aes crypto);
 	static void InvCypherDrive(aes crypto);
 
-	static BOOL GetDriveGeometry(LPWSTR wszPath, DISK_GEOMETRY *pdg);
+	static BOOL GetDriveGeometry(char* Path, DISK_GEOMETRY *pdg);
 	static void PrintDiscGemetry();
 };
 
