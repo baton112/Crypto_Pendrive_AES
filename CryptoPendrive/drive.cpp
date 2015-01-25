@@ -199,3 +199,20 @@ void drive::InvCypherSector(BYTE* buf, aes crypto)
 		crypto.inv_cipher(&buf[i]);
 	}
 }
+
+void drive::CypherDrive(aes crypto)
+{
+	BYTE buffor[512] ;
+	LONGLONG numberOfSectors = drive::NumberOfSectors();
+	std::cout << numberOfSectors << std::endl;
+
+	for(int i = 0; i < numberOfSectors; i++)
+	{
+		drive::ReadSector(i, buffor);
+		drive::CypherSector(buffor, crypto);
+		drive::WriteSector(i, buffor);
+		std::cout << "Postêp " << i << std::endl;
+	}
+
+
+}

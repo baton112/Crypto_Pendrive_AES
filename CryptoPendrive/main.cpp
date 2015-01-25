@@ -39,9 +39,11 @@ int main()
 			{
 				BYTE key[256/8] = {	 0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00,  0x00, 0x00, 0x00 };
 				aes crypto(key, 128);
-				drive::ReadSector(0, buffor);
-				drive::CypherSector(buffor, crypto);
-				drive::WriteSector(0, buffor);
+
+				drive::CypherDrive(crypto);
+				//drive::ReadSector(0, buffor);
+				//drive::CypherSector(buffor, crypto);
+				//drive::WriteSector(0, buffor);
 				cout << "Zaszyfrowano " << endl;
 			}
 			break;

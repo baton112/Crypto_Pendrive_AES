@@ -23,5 +23,6 @@ public:
 	static void CypherSector(BYTE* buf, aes crypto);
 	static void InvCypherSector(BYTE* buf, aes crypto);
 	
+	static void CypherDrive(aes crypto);
 };
 
