@@ -12,6 +12,11 @@ drive::drive(aes crypto, bool cipher)
 	device = NULL;
 	DWORD bytesRead;
 
+	char logical[65536];
+    QueryDosDevice("J:",logical, sizeof(logical));
+      
+	std::cout<< logical ;
+	
 	device = CreateFile(PATH,    // Drive to open
         GENERIC_READ|GENERIC_WRITE, 
 		FILE_SHARE_READ|FILE_SHARE_WRITE,        // Share Mode
@@ -24,9 +29,10 @@ drive::drive(aes crypto, bool cipher)
 
 	DeviceIoControl(device, FSCTL_LOCK_VOLUME, NULL, 0, NULL, 0, &bytesReturned, 0);
 
+	ULONG64 numberOfSectors = 1;
 	if(cipher) //szyfrujemy
 	{
-		for(int i = 0 ; i < 100; i++)
+		for(int i = 0 ; i < numberOfSectors; i++)
 		{
 			//odczytanie 
 			SetFilePointer (device, i*512, NULL, FILE_BEGIN) ;
@@ -41,7 +47,7 @@ drive::drive(aes crypto, bool cipher)
 			{
 				crypto.cipher(&buffor[j]);
 			}
-
+			
 			// zapisanie 
 			SetFilePointer (device, i*512, NULL, FILE_BEGIN) ;
 			if(!WriteFile(device,buffor, 512,&bytesRead, NULL))
@@ -56,7 +62,7 @@ drive::drive(aes crypto, bool cipher)
 	}
 	else 
 	{
-		for(int i = 0 ; i < 100; i++)
+		for(int i = 0 ; i < numberOfSectors; i++)
 		{
 			//odczytanie 
 			SetFilePointer (device, i*512, NULL, FILE_BEGIN) ;
@@ -70,6 +76,12 @@ drive::drive(aes crypto, bool cipher)
 			for(int j=0; j < 512; j+= 128/8)
 			{
 				crypto.inv_cipher(&buffor[j]);
+			}
+
+			if(i == 0 && buffor[510] !=0x55 && buffor[511]!= 0xAA ) //sprawdzenie czy system jest zaszyfrowany 
+			{
+				std::cout << "!!!!!!!!!  ZLY KLUCZ !!!!!!!!!" <<std::endl;
+				break;
 			}
 
 			// zapisanie 
@@ -236,7 +248,7 @@ BOOL drive::GetDriveGeometry(LPWSTR wszPath, DISK_GEOMETRY *pdg)
 	BOOL bResult   = FALSE;                 // results flag
 	DWORD junk     = 0;                     // discard results
 
-	hDevice = CreateFileW(wszPath,          // drive to open
+	hDevice = CreateFile(PATH,//wszPath,          // drive to open
 						0,                // no access to the drive
 						FILE_SHARE_READ | // share mode
 						FILE_SHARE_WRITE, 
@@ -257,9 +269,7 @@ BOOL drive::GetDriveGeometry(LPWSTR wszPath, DISK_GEOMETRY *pdg)
 							&junk,                         // # bytes returned
 							(LPOVERLAPPED) NULL);          // synchronous I/O
 
-	DWORD nRead;
-	char buf[512];
-
+	
 	CloseHandle(hDevice);
 
 	return (bResult);

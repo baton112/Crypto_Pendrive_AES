@@ -7,10 +7,22 @@
 #include <winioctl.h>
 #include <stdio.h>
 
+
 #define PATH "\\\\.\\J:"
 
-#define wszDrive L"\\\\.\\PhysicalDrive2"
+//#define PATH "\\\\.\\PhysicalDrive2"
+//#define PATH "\\.\\Device\\HarddiskVolume11"
+// QueryDosDevice("J:",logical, sizeof(logical));
+      
+//#define PATH "\\\\.\\PhysicalDrive1"
 
+//#define wszDrive L"\\\\.\\PhysicalDrive2"
+#define wszDrive L"\\\\.\\J:"
+
+
+
+//  QueryDosDevice("J:",logical, sizeof(logical));
+      
 class drive
 {
 private: 
