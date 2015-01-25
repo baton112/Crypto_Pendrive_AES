@@ -1,4 +1,4 @@
-#include <windows.h>1
+#include <windows.h>
 #include <stdio.h>
 #include <iostream>
 #include "drive.h"
@@ -39,12 +39,9 @@ int main()
 			{
 				BYTE key[256/8] = {	 0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00,  0x00, 0x00, 0x00 };
 				aes crypto(key, 128);
-				drive::ReadSector(0x00, buffor);
+				drive::ReadSector(0, buffor);
 				drive::CypherSector(buffor, crypto);
-				drive::WriteSector(0x00, buffor);
-				drive::ReadSector(0x10, buffor);
-				drive::CypherSector(buffor, crypto);
-				drive::WriteSector(0x10, buffor);
+				drive::WriteSector(0, buffor);
 				cout << "Zaszyfrowano " << endl;
 			}
 			break;
@@ -66,12 +63,9 @@ int main()
 			{
 				BYTE key[256/8] = {	 0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00,  0x00, 0x00, 0x00 };
 				aes crypto(key, 128);
-				drive::ReadSector(0x0, buffor);
+				drive::ReadSector(0, buffor);
 				drive::InvCypherSector(buffor, crypto);
-				drive::WriteSector(0x00, buffor);
-				drive::ReadSector(0x10, buffor);
-				drive::InvCypherSector(buffor, crypto);
-				drive::WriteSector(0x10, buffor);
+				drive::WriteSector(0, buffor);
 				cout << "Odszyfrowano " << endl;
 			}
 			break;
