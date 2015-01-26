@@ -39,7 +39,7 @@ int main()
 	drive::SetClusterSize_FAT_OFFSET();
 
 	//drive::PrintFiles();
-	/*
+	
 	drive d;
 	
 	cout << "Wybierz nazwe pliku. " << PATH << endl;
@@ -51,7 +51,9 @@ int main()
 	//d.CypherFile(crypto, nrPliku);
 	d.FindFirstSector(nrPliku, crypto);
 	cout << "Zaszyfrowano " << PATH << endl;
-	*/
+	
+
+	
 
 
 	switch (fileSystem)

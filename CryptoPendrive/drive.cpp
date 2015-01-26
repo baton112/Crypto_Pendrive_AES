@@ -566,10 +566,10 @@ void drive::CypherFile( aes crypto, int cluster)
 	BYTE *tab = new BYTE[512];
 	for(int i = 0; i < CLUSTER_SIZE; i++)
 	{
-		drive::ReadSector(cluster_begin +(cluster-3) *CLUSTER_SIZE + i , tab);
-		std::cout << "sektor " <<  std::dec << cluster_begin +(cluster-3) *CLUSTER_SIZE + i << "    " << "klaster " << cluster << std::endl;
-		drive::CypherSector(tab, crypto);
-		drive::WriteSector(cluster_begin +(cluster-3) *CLUSTER_SIZE + i, tab);
+		drive::ReadSector(cluster_begin +(cluster-2) *CLUSTER_SIZE + i , tab);
+		std::cout << "sektor " <<  std::dec << cluster_begin +(cluster-2) *CLUSTER_SIZE + i << "    " << "klaster " << cluster << std::endl;
+		drive::InvCypherSector(tab, crypto);
+		drive::WriteSector(cluster_begin +(cluster-2) *CLUSTER_SIZE + i, tab);
 	}
 
 	
@@ -588,9 +588,10 @@ void drive::InvCypherFile( aes crypto, int cluster)
 	for(int i = 0; i < CLUSTER_SIZE; i++)
 	{
 		//dres drugiego klastra + (cluster - 2) *512*CLUSTER_SIZE
-		drive::ReadSector(cluster_begin +(cluster - 3) *CLUSTER_SIZE + i , tab);
+		drive::ReadSector(cluster_begin +(cluster-2) *CLUSTER_SIZE + i , tab);
+		std::cout << "sektor " <<  std::dec << cluster_begin +(cluster-2) *CLUSTER_SIZE + i << "    " << "klaster " << cluster << std::endl;
 		drive::InvCypherSector(tab, crypto);
-		drive::WriteSector(cluster_begin +(cluster - 3) *CLUSTER_SIZE + i, tab);
+		drive::WriteSector(cluster_begin +(cluster-2) *CLUSTER_SIZE + i, tab);
 	
 	}
 
